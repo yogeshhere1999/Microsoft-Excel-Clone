@@ -70,9 +70,9 @@ $(document).ready(function () {
     $(".input-cell").click(function (e) {
         let [rowId, colId] = getRowCol(this);
         if (e.ctrlKey) {
-            console.log("selecting");
+
             //   let [rowId,colId] =  getRowCol(this);
-            console.log(rowId, colId);
+
             if (rowId > 1) {
                 let topCellSelected = $(`#row-${rowId - 1}-col-${colId}`).hasClass("selected");
                 if (topCellSelected) {
@@ -98,7 +98,7 @@ $(document).ready(function () {
             }
             if (colId < 100) {
                 let rightCellSelected = $(`#row-${rowId}-col-${colId + 1}`).hasClass("selected");
-                console.log(rightCellSelected);
+
                 if (rightCellSelected) {
                     $(this).addClass("right-cell-selected");
                     $(`#row-${rowId}-col-${colId + 1}`).addClass("left-cell-selected");
@@ -123,6 +123,7 @@ $(document).ready(function () {
     function changeHeader(ele) {
         let [rowId, colId] = getRowCol(ele);
         let cellInfo = defaultProperties;
+        console.log(cellInfo);
         if (cellData[selectedSheet][rowId] && cellData[selectedSheet][rowId][colId]) {
             cellInfo = cellData[selectedSheet][rowId][colId];
         }
@@ -167,7 +168,7 @@ $(document).ready(function () {
     }
 
     function updateCell(property, value, defaultPossible) {
-        console.log(cellData);
+
         $(".input-cell.selected").each(function () {
             $(this).css(property, value);
 
@@ -243,7 +244,7 @@ $(document).ready(function () {
 
     $(".icon-align-center").click(function () {
         if ($(this).hasClass("selected")) {
-            console.log("call");
+
             updateCell("text-align", "center", true);
 
         }
@@ -281,6 +282,48 @@ $(document).ready(function () {
 
     });
 
+    let selectedCells = [];
+    let cut = false;
+
+    $(".icon-copy").click(function(){
+        $(".input-cell.selected").each(function(){
+            selectedCells.push(getRowCol(this));
+        })
+        
+    });
+    $(".icon-cut").click(function(){
+        $(".input-cell.selected").each(function(){
+            selectedCells.push(getRowCol(this));
+    });
+    cut true;
+
+    $(".icon-paste").click(function(){
+        emptySheet();
+        let [rowId,colId] = getRowCol($(".input-cell.selected")[0]);
+        let rowDistence = rowId -selectedCells [0][0] ;
+        let colDistence = colId -selectedCells [0][1] ;
+        for(let cell of selectedCells){
+            let newRowId = cell[0] + rowDistence;
+            let newColId = cell[1] + colDistence;
+            
+            if(!cellData[selectedSheet][newRowId]){
+                cellData[selectedSheet][newRowId] = {};
+                   
+                }
+                 cellData[selectedSheet][newRowId][newColId] = {...cellData[selectedSheet][cell[0]][cell[1]]};
+                 if(cut){
+                     delete cellData[selectedSheet][cell[0]][cell[1]];
+                     if(Object.keys(cellData[selectedSheet][cell[0]])==0){
+                         delete cellData[selectedSheet][cell[0]];
+                     }
+                 }
+            }
+        if(cut){
+            cut = false;
+            selectedCells = [];
+        }
+            loadSheet();
+     })
 
 });
 
@@ -304,7 +347,7 @@ function emptySheet() {
 
 function loadSheet() {
     let sheetInfo = cellData[selectedSheet];
-    console.log(cellData);
+
     for (let i of Object.keys(sheetInfo)) {
         for (let j of Object.keys(sheetInfo[i])) {
             let cellInfo = cellData[selectedSheet][i][j];
@@ -343,16 +386,81 @@ function addSheetEvents() {
 
     });
     $(".sheet-tab.selected").contextmenu(function (e) {
+
         e.preventDefault();
-        $(".container").append(`<div class = "sheet-options-modal">
-                                <div class = "sheet-rename">Rename</div>
-                                <div class = "sheet-delete">Delete</div>
+        selectSheet(this);
 
-                            </div>`);
-    $(".sheet-options-modal").css("left", e.pageX + "px");
+        if ($(".sheet-options-modal").length == 0) {
 
-    })
+            $(".Container").append(`<div class = "sheet-options-modal">
+            <div class = "sheet-rename">Rename</div>
+            <div class = "sheet-delete">Delete</div>
+
+        </div>`);
+
+            $(".sheet-rename").click(function () {
+                $(".Container").append(`<div class = "sheet-rename-modal">
+                                     <h4 class = "modal-title">Rename Sheet To</h4>
+                                    <input type = "text" class = "new-sheet-name" placeholder="Sheet Name"/>
+                                    <div class = "action-buttons">
+                                   <div class = "submit-button">Rename</div>
+                                    <div class = "cancel-button">Cancel</div>
+                                    </div>
+                                     </div>`);
+
+                $(".cancel-button").click(function () {
+                    $(".sheet-rename-modal").remove();
+                });
+                $(".submit-button").click(function () {
+                    let newSheetName = $(".new-sheet-name").val();
+                    $(".sheet-tab.selected").text(newSheetName);
+                    let newCellData = {};
+                    for (let key in cellData) {
+                        if (key != selectedSheet) {
+                            newCellData[key] = cellData[key];
+                        } else {
+                            newCellData[newSheetName] = cellData[key];
+                        }
+
+
+                    }
+                    cellData = newCellData;
+                    selectedSheet = newSheetName;
+                    $(".sheet-rename-modal").remove();
+
+
+                })
+
+            });
+
+            $(".sheet-delete").click(function () {
+                if (Object.keys(cellData).length > 1) {
+                    let currSheetName = selectedSheet;
+                    let currSheet = $(".sheet-tab.selected");
+                    let currSheetIndex = Object.keys(cellData).indexOf(selectSheet);
+                    if (currSheetIndex == 0) {
+                        $(".sheet-tab.selected").next().click();
+                    } else {
+                        $(".sheet-tab.selected").prev().click();
+                    }
+                    delete cellData[currSheetName];
+                    currSheet.remove();
+                } else {
+
+                    alert("sorry , only sheet exist");
+                }
+
+            })
+        }
+
+        $(".sheet-options-modal").css("left", e.pageX + "px");
+
+    });
+
 }
+$(".Container").click(function () {
+    $(".sheet-options-modal").remove();
+})
 
 addSheetEvents()
 
@@ -364,6 +472,15 @@ function selectSheet(ele) {
     loadSheet();
 
 }
+
+
+
+
+
+
+
+
+
 
 
 

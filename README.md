@@ -15,4 +15,4 @@
 
 ---
 
-[Click me to checkout Whiteboard!](https://yogeshhere1999.github.io/Microsoft-Excel-Clone/)
+[Click me to checkout Excel Clone!](https://yogeshhere1999.github.io/Microsoft-Excel-Clone/)

@@ -295,7 +295,7 @@ $(document).ready(function () {
         $(".input-cell.selected").each(function(){
             selectedCells.push(getRowCol(this));
     });
-    cut true;
+    cut = true;
 
     $(".icon-paste").click(function(){
         emptySheet();
@@ -472,17 +472,4 @@ function selectSheet(ele) {
     loadSheet();
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+})

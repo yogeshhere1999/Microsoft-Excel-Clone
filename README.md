@@ -1,6 +1,9 @@
 ### Hello Yogesh here to Introduce about
 ### _ExcelClone_
 
+## Description
+    • Calculations can be performed on cells with respect to formula by Infix evaluation using Stacks Data Structures. Two-way binding on all cells with it's own properties mapped and highlighted.
+
 ## Features
     - Make excel sheets
     - Add and Delete Sheets
